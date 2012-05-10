@@ -1,0 +1,78 @@
+h1. Pluggable Source
+
+h2. What is it?
+
+Pluggable Source is a simple mixin that extracts the common steps associated with writing objects with fewer hard-coded dependencies.
+
+It derives its name and inspiration from some examples in Avdi Grimm's "Objects on Rails":http://objectsonrails.com/.
+
+h2. Does it suck?
+
+Well, I may want to change parts of the implemenation and the method names can be a little wordy... Wait, what? No! How dare you.
+
+You should use this if you want:
+
+# To have less coupling between your classes, which leads to ...
+# Classes that just focus on doing one thing, meaning you get ...
+# Components that are easier to replace, and ...
+# Tests that are easier to write, particularly because you'll ...
+# (to n|N)ever have use heavyweight mocking or stubing on your collaborators, which usually end up specifying implementation details rather than ...
+# Contracts between separate components.
+
+h2. Hey, wait a tick... Isn't this just Inversion of Control? Aren't "sources" just a kind of Factory?
+
+What? No... Ok, yes.
+
+A lot of times when someone brings up "Inversion of Control":http://martinfowler.com/articles/injection.html, a statisically significant number of programmers in the room will groan and stamp their feet. Outliers may even gnash teeth and/or throw things. I've seen it. Once.
+
+Common objections are: "That's for Java jerks." "I tried that one time in Java and it sucked and required a huge framework and I don't wanna." "Who are you and what are you doing with my car?" Etc.
+
+"Factories" have some similar baggage (though maybe a little less so). "Yo Dawg, I heard your like Patterns, so I put an AbstractFactoryStrategyTemplateDelegate in your Presenter so that you can never again know what the hell is happening anywhere in your code." Though, I'm sure one day we'll get over these prejudices, that day is not today.
+
+So yes: it's Inversion of Control and "sources" are really just .respond_to?(:call)'s (Procs usually, but feel free to be creative) acting as Factories.
+
+Also, defaults are easy to set-up, so many times this extra bit of indirection will be invisible to programmers downstream.
+
+h2. Examples
+
+<code><pre>
+class Blog
+  include PluggableSource
+
+  define_pluggable_source :new_post do |attrs|
+    Post.new(attrs)
+  end
+
+  define_pluggable_source :backend,
+    :default => lambda {|id| BlogRecord.find(id) },
+    :mongo => lambda {|id| BlogDocument.find(id) }
+
+  def intialize(id, transitioned_to_mongo = false)
+    @id = id
+    @posts = []
+    set_source!(:backend, :mongo) if transitioned_to_mongo
+  end
+
+  def backend
+    @backend ||= using_source(:backend).call(@id)
+  end
+
+  def_delegator :backed,
+    :title,
+    :owner
+
+  def add_post(attrs)
+    @posts << using_source(:new_post).call(attrs)
+  end
+end
+
+describe Blog do
+  it "gets its title from its backend" do
+    blog = Blog.new(:stub_id).tap do |b|
+      b.set_source!(:backend) {|_| OpenStruct.new(:title => "My Title") }
+    end
+
+    assert_equal "My Title", blog.title
+  end
+end
+</code></pre>
