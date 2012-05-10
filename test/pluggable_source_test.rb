@@ -9,14 +9,32 @@ describe "A class with PluggableSource mixed in" do
     @blog_class = Class.new do
       include PluggableSource
 
-      define_pluggable_source :new_posts,
+      define_pluggable_source :new_posts, 
         :database => lambda {|attrs| :stub_from_database },
-        :flat_file => lambda {|attrs| :stub_from_flat_file }
+        :default => lambda {|attrs| :stub_from_flat_file }
+
+      define_pluggable_source :logger do
+        :stub_logger_instance
+      end
 
       def add_post(post_attrs)
         using_source(:new_posts).call(post_attrs)
       end
+
+      def logger
+        using_source(:logger).call
+      end
     end
+  end
+
+  it "uses the block by default" do
+    blog = @blog_class.new
+    assert_equal :stub_logger_instance, blog.logger
+  end
+
+  it "uses the choice named default by default" do
+    blog = @blog_class.new
+    assert_equal :stub_from_flat_file, blog.add_post({:title => "Foo"})
   end
 
   it "allows setting a source using a known symbol" do

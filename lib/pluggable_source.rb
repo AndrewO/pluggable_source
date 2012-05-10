@@ -2,9 +2,10 @@ require "pluggable_source/version"
 
 module PluggableSource
   module ClassMethods
-    def define_pluggable_source(name, choices = {})
+    def define_pluggable_source(name, choices = {}, &default)
       @pluggable_source_definitions ||= {}
       @pluggable_source_definitions[name] = choices
+      @pluggable_source_definitions[name][:default] = default if block_given?
     end
 
     def pluggable_source_for(name, choice)
@@ -28,6 +29,6 @@ module PluggableSource
   protected
   def using_source(name)
     @pluggable_sources ||= {}
-    @pluggable_sources[name]
+    @pluggable_sources[name] ||  self.class.pluggable_source_for(name, :default)
   end
 end
