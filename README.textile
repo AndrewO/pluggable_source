@@ -36,6 +36,7 @@ Also, defaults are easy to set-up, so many times this extra bit of indirection w
 h2. Examples
 
 <code><pre>
+
 class Blog
   include PluggableSource
 
@@ -75,4 +76,5 @@ describe Blog do
     assert_equal "My Title", blog.title
   end
 end
+
 </code></pre>
