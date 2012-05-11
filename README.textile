@@ -35,7 +35,7 @@ Also, defaults are easy to set-up, so many times this extra bit of indirection w
 
 h2. Examples
 
-<code><pre>
+<pre><code>
 
 class Blog
   include PluggableSource
