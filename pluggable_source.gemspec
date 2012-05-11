@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.authors     = ["Andrew O'Brien"]
   s.email       = ["obrien.andrew@gmail.com"]
   s.homepage    = "http://github.com/AndrewO/pluggable_source"
-  s.summary     = %q{A small mixin help specify dependencies as lambdas.}
+  s.summary     = %q{A small mixin to keep your code isolated, make testing easy, and restore happiness to your life.}
   s.description = %q{Often, we want to isolate dependencies on other classes and make them configurable at runtime. This allows easier test isolation and separation of concerns. This libary abstracts away most of the repeated code when doing that.}
 
   s.rubyforge_project = "pluggable_source"
